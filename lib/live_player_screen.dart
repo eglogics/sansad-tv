@@ -16,6 +16,7 @@ class LivePlayerScreen extends StatefulWidget {
 
 class _LivePlayerScreenState extends State<LivePlayerScreen> {
   bool fetchStatus = true;
+  bool fullscreen = false;
 
   @override
   void initState() {
@@ -27,29 +28,32 @@ class _LivePlayerScreenState extends State<LivePlayerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
-      appBar: AppBar(
+      appBar: fullscreen == false
+          ? AppBar(
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
-      ),
+      )
+          : null,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
-            final bool isWideScreen = constraints.maxWidth > 1000;
-
+            var width = MediaQuery.of(context).size.width;
+            var height = MediaQuery.of(context).size.height;
             return Container(
               color: Colors.white,
-              //decoration: pageCardDecoration(),
               child: SingleChildScrollView(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    SizedBox(
-                      height: (MediaQuery.of(context).size.width)/11*9,
-                      width: double.infinity,
+                    AspectRatio(
+                      aspectRatio: fullscreen==true?1.30:10/8,
                       child: YoYoPlayer(
-                        aspectRatio: 16 / 9,
                         url: widget.livestreamUrl,
-                          videoStyle: VideoStyle(
+                          onFullScreen: (t) {
+                            setState(() {
+                              fullscreen = t;
+                            });
+                          },
+                          videoStyle: const VideoStyle(
                             playIcon: Icon(Icons.play_arrow),
                             pauseIcon: Icon(Icons.pause),
                             fullscreenIcon: Icon(Icons.fullscreen),
@@ -60,9 +64,8 @@ class _LivePlayerScreenState extends State<LivePlayerScreen> {
                     ),
                     const SizedBox(height: 15),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                      child: fetchStatus
-                          ? Column(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: fetchStatus ? Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
@@ -115,7 +118,6 @@ class _LivePlayerScreenState extends State<LivePlayerScreen> {
                             )
                           : const NetworkError(),
                     ),
-                    const SizedBox(height: 450.0),
                   ],
                 ),
               ),
