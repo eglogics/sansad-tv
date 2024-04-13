@@ -21,7 +21,6 @@ class _LivePlayerScreenState extends State<LivePlayerScreen> {
   @override
   void initState() {
     super.initState();
-    print("RanjeetTest===========>");
   }
 
   @override
@@ -45,21 +44,26 @@ class _LivePlayerScreenState extends State<LivePlayerScreen> {
                 child: Column(
                   children: [
                     AspectRatio(
-                      aspectRatio: fullscreen==true?1.30:10/8,
-                      child: YoYoPlayer(
-                        url: widget.livestreamUrl,
-                          onFullScreen: (t) {
-                            setState(() {
-                              fullscreen = t;
-                            });
-                          },
-                          videoStyle: const VideoStyle(
-                            playIcon: Icon(Icons.play_arrow),
-                            pauseIcon: Icon(Icons.pause),
-                            fullscreenIcon: Icon(Icons.fullscreen),
-                            forwardIcon: Icon(Icons.skip_next),
-                            backwardIcon: Icon(Icons.skip_previous),
-                          )
+                      aspectRatio: fullscreen==true?2.0:10/8,
+                      child: InteractiveViewer(
+                        scaleEnabled: true,
+                        maxScale: 4,
+                        minScale: 0.5,
+                        child: YoYoPlayer(
+                          url: widget.livestreamUrl,
+                            onFullScreen: (t) {
+                              setState(() {
+                                fullscreen = t;
+                              });
+                            },
+                            videoStyle: const VideoStyle(
+                              playIcon: Icon(Icons.play_arrow),
+                              pauseIcon: Icon(Icons.pause),
+                              fullscreenIcon: Icon(Icons.fullscreen),
+                              forwardIcon: Icon(Icons.skip_next),
+                              backwardIcon: Icon(Icons.skip_previous),
+                            )
+                        ),
                       ),
                     ),
                     const SizedBox(height: 15),

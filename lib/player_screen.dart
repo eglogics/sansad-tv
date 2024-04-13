@@ -2,6 +2,7 @@ import "dart:convert";
 import "dart:developer";
 
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:flutter_linkify/flutter_linkify.dart";
 import "package:html_unescape/html_unescape.dart";
 import "package:sansadtv_app/constants.dart";
@@ -30,6 +31,26 @@ class _PlayerScreenState extends State<PlayerScreen> {
   String publishedAtDate = "";
   String publishedAtTime = "";
 
+  bool isFullscreen = false;
+
+  void _enableFullscreen(bool fullscreen) {
+    isFullscreen = fullscreen;
+    if (fullscreen) {
+      // Force landscape orientation for fullscreen
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    } else {
+      // Force portrait
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
+      SystemChrome.setPreferredOrientations([]);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -43,99 +64,120 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print("RanjeetTest===========>"+widget.videoID);
     final controller = YoutubePlayerController.fromVideoId(
       videoId: widget.videoID,
       autoPlay: false,
       params: const YoutubePlayerParams(showFullscreenButton: false),
     );
-
-    return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
-      appBar: AppBar(
+    return WillPopScope(
+      onWillPop: () {
+        Navigator.pop(context, false);
+        _enableFullscreen(!isFullscreen);
+        return Future.value(false);
+      },
+      child: Scaffold(
         backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
-              final bool isWideScreen = constraints.maxWidth > 1000;
+        appBar: isFullscreen == false ? AppBar(
+          backgroundColor: Theme.of(context).primaryColor,
+          foregroundColor: Colors.white,
+        ):null,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
 
-              return Container(
-                decoration: pageCardDecoration(),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const SizedBox(height: 50.0),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: isWideScreen ? 200.0 : 20.0, vertical: 20.0),
-                        child: IntrinsicWidth(
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black,
-                                  blurRadius: 8.0,
-                                )
-                              ],
-                            ),
-                            child: YoutubePlayer(
-                              controller: controller,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 15),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: fetchStatus
-                            ? Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    title,
-                                    style: const TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    publishedAtDate,
-                                    style: TextStyle(
-                                      color: Colors.grey[700],
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    publishedAtTime,
-                                    style: TextStyle(
-                                      color: Colors.grey[700],
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Linkify(
-                                    onOpen: (LinkableElement link) async {
-                                      if (!await launchUrl(Uri.parse(link.url))) {
-                                        throw Exception('Could not launch $link.url');
-                                      }
-                                    },
-                                    text: description,
-                                  ),
-                                ],
+                return Container(
+                  decoration: pageCardDecoration(),
+                  child: RawScrollbar(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Stack(
+                            children: [
+                              Container(
+                                decoration: const BoxDecoration(
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black,
+                                      blurRadius: 8.0,
+                                    )
+                                  ],
+                                ),
+                                child: YoutubePlayer(
+                                  controller: controller,
+                                ),
+                              ),
+                    
+                              Positioned(
+                                right: 45.0,
+                                bottom: 0.0,
+                                child: FloatingActionButton(
+                                  backgroundColor: Colors.transparent,
+                                  onPressed: () {
+                                    setState(() {
+                                      _enableFullscreen(!isFullscreen);
+                                    });
+                                  },
+                                  child: const Icon(Icons.fullscreen,color: Colors.white,),
+                                ),
+                    
                               )
-                            : const NetworkError(),
+                            ],
+                          ),
+                          const SizedBox(height: 15),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                            child: fetchStatus
+                                ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  title,
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  publishedAtDate,
+                                  style: TextStyle(
+                                    color: Colors.grey[700],
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  publishedAtTime,
+                                  style: TextStyle(
+                                    color: Colors.grey[700],
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Linkify(
+                                  onOpen: (LinkableElement link) async {
+                                    if (!await launchUrl(Uri.parse(link.url))) {
+                                      throw Exception('Could not launch $link.url');
+                                    }
+                                  },
+                                  text: description,
+                                ),
+                              ],
+                            )
+                                : const NetworkError(),
+                          ),
+                          const SizedBox(height: 350.0),
+                        ],
                       ),
-                      const SizedBox(height: 350.0),
-                    ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
-      ),
+      )
     );
   }
 
