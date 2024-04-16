@@ -36,7 +36,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
   void _enableFullscreen(bool fullscreen) {
     isFullscreen = fullscreen;
     if (fullscreen) {
-      // Force landscape orientation for fullscreen
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.landscapeRight,
@@ -60,15 +60,30 @@ class _PlayerScreenState extends State<PlayerScreen> {
   @override
   void dispose() {
     super.dispose();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
   }
 
   @override
   Widget build(BuildContext context) {
     print("RanjeetTest===========>"+widget.videoID);
-    final controller = YoutubePlayerController.fromVideoId(
+    var controller = YoutubePlayerController.fromVideoId(
       videoId: widget.videoID,
       autoPlay: false,
-      params: const YoutubePlayerParams(showFullscreenButton: false),
+      params: const YoutubePlayerParams(showFullscreenButton: true),
+    );
+
+
+    controller.setFullScreenListener((isFullScreen) {
+             setState(() {
+               if(isFullscreen==false){
+                 isFullscreen=true;
+                 _enableFullscreen(isFullscreen);
+               }else{
+                 isFullscreen=false;
+               }
+               log('${isFullScreen ? 'Entered' : 'Exited'} Fullscreen.');
+             });
+      },
     );
     return WillPopScope(
       onWillPop: () {
@@ -83,98 +98,64 @@ class _PlayerScreenState extends State<PlayerScreen> {
           foregroundColor: Colors.white,
         ):null,
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-
-                return Container(
-                  decoration: pageCardDecoration(),
-                  child: RawScrollbar(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Stack(
-                            children: [
-                              Container(
-                                decoration: const BoxDecoration(
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black,
-                                      blurRadius: 8.0,
-                                    )
-                                  ],
-                                ),
-                                child: YoutubePlayer(
-                                  controller: controller,
-                                ),
-                              ),
-                    
-                              Positioned(
-                                right: 45.0,
-                                bottom: 0.0,
-                                child: FloatingActionButton(
-                                  backgroundColor: Colors.transparent,
-                                  onPressed: () {
-                                    setState(() {
-                                      _enableFullscreen(!isFullscreen);
-                                    });
-                                  },
-                                  child: const Icon(Icons.fullscreen,color: Colors.white,),
-                                ),
-                    
-                              )
-                            ],
-                          ),
-                          const SizedBox(height: 15),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                            child: fetchStatus
-                                ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  title,
-                                  style: const TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  publishedAtDate,
-                                  style: TextStyle(
-                                    color: Colors.grey[700],
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  publishedAtTime,
-                                  style: TextStyle(
-                                    color: Colors.grey[700],
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Linkify(
-                                  onOpen: (LinkableElement link) async {
-                                    if (!await launchUrl(Uri.parse(link.url))) {
-                                      throw Exception('Could not launch $link.url');
-                                    }
-                                  },
-                                  text: description,
-                                ),
-                              ],
-                            )
-                                : const NetworkError(),
-                          ),
-                          const SizedBox(height: 350.0),
-                        ],
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              return Container(
+                decoration: pageCardDecoration(),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      YoutubePlayer(
+                        controller: controller,
+                        aspectRatio: 16/9,
                       ),
-                    ),
+                      const SizedBox(height: 15),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: fetchStatus
+                            ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              publishedAtDate,
+                              style: TextStyle(
+                                color: Colors.grey[700],
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              publishedAtTime,
+                              style: TextStyle(
+                                color: Colors.grey[700],
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Linkify(
+                              onOpen: (LinkableElement link) async {
+                                if (!await launchUrl(Uri.parse(link.url))) {
+                                  throw Exception('Could not launch $link.url');
+                                }
+                              },
+                              text: description,
+                            ),
+                          ],
+                        )
+                            : const NetworkError(),
+                      ),
+                      const SizedBox(height: 350.0),
+                    ],
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         ),
       )
