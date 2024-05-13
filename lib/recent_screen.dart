@@ -9,8 +9,9 @@ import 'package:http/http.dart' as http;
 import "package:sansadtv_app/search_screen.dart";
 import "package:sansadtv_app/static_data_pages.dart";
 import "package:sansadtv_app/themes.dart";
-
-import 'videos_list.dart';
+import "package:sansadtv_app/utils/method.dart";
+import "package:sansadtv_app/utils/video_list_new.dart";
+import "model/recent_show_model.dart";
 
 class RecentScreen extends StatefulWidget {
   const RecentScreen({super.key});
@@ -26,6 +27,8 @@ class _RecentScreenState extends State<RecentScreen> {
   late List<String> videoDate = [];
   late List<String> livestreamTitle = [];
   late List<String> livestreamUrl = [];
+  Future<dynamic>? mRecentShowVideoList;
+
   bool lsfetchStatus = false;
   bool videofetchStatus = true;
   var unescape = HtmlUnescape();
@@ -35,6 +38,12 @@ class _RecentScreenState extends State<RecentScreen> {
     super.initState();
     fetchLS();
     fetchVideos();
+    mRecentShowVideoList=validateGetVideoList();
+    mRecentShowVideoList!.then((value){
+      print("==============>"+value.recentShows[0].title);
+      print("==============>"+value.recentShows[0].Img);
+
+    });
   }
 
   @override
@@ -176,17 +185,20 @@ class _RecentScreenState extends State<RecentScreen> {
                         ),
                       ),
                     ),
-                    videofetchStatus
-                        ? VideosList(
-                            videoID: videoID,
-                            videoThumbnailUrl: videoThumbnailUrl,
-                            videoTitle: videoTitle,
-                            videoDate: videoDate,
-                          )
-                        : const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 150.0),
-                            child: NetworkError(),
-                          ),
+                    FutureBuilder(
+                        future: mRecentShowVideoList,
+                        builder: (BuildContext ctx, AsyncSnapshot<dynamic> snapshot) =>
+                        snapshot.hasData ? VideosListNew(recentShows: snapshot.data.recentShows,)/*VideosList(
+                          videoID: videoID,
+                          videoThumbnailUrl: videoThumbnailUrl,
+                          videoTitle: videoTitle,
+                          videoDate: videoDate,
+                        )*/: const  Padding(
+                          padding: EdgeInsets.symmetric(vertical: 150.0),
+                          child: NetworkError(),
+                        ),
+                    ),
+
                   ],
                 ),
               ),
@@ -251,4 +263,20 @@ class _RecentScreenState extends State<RecentScreen> {
       log(e.toString());
     }
   }
+
+  Future<Recentshowmodel?> validateGetVideoList() async {
+     bool internet = true;
+    internet = await Method.check();
+    if (internet) {
+      final response = await http.get(Uri.parse('https://sansadtv.nic.in/wp-json/wp/v2/recent_shows'));
+      print(response.body.toString());
+      Map mapRes = json.decode(response.body);
+      if (mapRes['Status'] == '200') {
+        return Recentshowmodel.fromJson(mapRes);
+      } else {
+        return Recentshowmodel.fromJson(mapRes);
+      }
+    }
+  }
+
 }

@@ -34,8 +34,10 @@ class _NoticeScreenState extends State<ExploreScreen> {
     menuElement = document.getElementById('menu-main-menu') as html.Element;
     fetchNavItems(menuElement);
     cleanNavItems();
-    navigationStack[0][0].children.add(navigationStack[0][4]);
-    navigationStack[0].removeLast();
+    if(navigationStack[0].length==3) {
+      navigationStack[0][0].children.add(navigationStack[0][4]);
+      navigationStack[0].removeLast();
+    }
   }
 
   void cleanNavItems() {

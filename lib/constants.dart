@@ -29,6 +29,8 @@ const String ytUrl = "https://www.youtube.com/c/sansadtv";
 const String noticeUrl = "https://sansadtv.nic.in/notices";
 
 const String lsLiveUrl = "https://hls.media.nic.in/hls/live/lstv/lstv.m3u8";
+//const String lsLiveUrl = "https://sansadtv.nic.in/wp-content/themes/sansadtv/player/video.html?hlsurl=https://hls.media.nic.in/hls/live/lstv/lstv.m3u8&image=https://sansadtv.nic.in/wp-content/uploads/2021/09/Iconic-Speeches3.jpg&autostart=true";
+//const String rsLiveUrl = "https://sansadtv.nic.in/wp-content/themes/sansadtv/player/video.html?hlsurl=https://hls.media.nic.in/hls/live/rstv/rstv.m3u8&image=https://sansadtv.nic.in/wp-content/uploads/2021/09/Iconic-Speeches-3.jpg&autostart=true";
 const String rsLiveUrl = "https://hls.media.nic.in/hls/live/rstv/rstv.m3u8";
 const String certificate = '''-----BEGIN CERTIFICATE-----
 MIIGLjCCBRagAwIBAgIQCLJ48FI6XOq6u63YgGQaUTANBgkqhkiG9w0BAQsFADBg

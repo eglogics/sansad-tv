@@ -60,7 +60,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
   @override
   void dispose() {
     super.dispose();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
+    //SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
+    isFullscreen=false;
+    _enableFullscreen(isFullscreen);
   }
 
   @override
@@ -88,7 +90,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
     return WillPopScope(
       onWillPop: () {
         Navigator.pop(context, false);
-        _enableFullscreen(!isFullscreen);
+        isFullscreen=false;
+        _enableFullscreen(isFullscreen);
         return Future.value(false);
       },
       child: Scaffold(

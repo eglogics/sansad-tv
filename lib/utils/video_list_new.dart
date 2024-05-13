@@ -1,26 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:sansadtv_app/live_player_screen.dart';
 import 'package:sansadtv_app/player_screen.dart';
+import 'package:sansadtv_app/utils/player_screen_new.dart';
+import '../model/recent_show_model.dart';
 
-class VideosList extends StatefulWidget {
-  const VideosList({
+class VideosListNew extends StatefulWidget {
+  const VideosListNew({
     super.key,
-    required this.videoID,
-    required this.videoThumbnailUrl,
-    required this.videoTitle,
-    required this.videoDate,
+    required this.recentShows,
   });
 
-  final List<String> videoID;
-  final List<String> videoThumbnailUrl;
-  final List<String> videoTitle;
-  final List<String> videoDate;
+  final List<RecentShows> recentShows;
 
   @override
-  State<VideosList> createState() => _VideosListState();
+  State<VideosListNew> createState() => _VideosListNewState();
 }
 
-class _VideosListState extends State<VideosList> {
+class _VideosListNewState extends State<VideosListNew> {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -29,13 +25,13 @@ class _VideosListState extends State<VideosList> {
           return ListView.builder(
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
-            itemCount: widget.videoID.length,
+            itemCount: widget.recentShows.length,
             itemBuilder: (context, index) {
-              return VideoCard(
-                videoID: widget.videoID[index],
-                videoThumbnailUrl: widget.videoThumbnailUrl[index],
-                videoTitle: widget.videoTitle[index],
-                videoDate: widget.videoDate[index],
+              return VideoCard1(
+                videoID: widget.recentShows[index].episode_iframe_video,
+                videoThumbnailUrl: widget.recentShows[index].Img,
+                videoTitle: widget.recentShows[index].title,
+                videoDate: widget.recentShows[index].fullDesc,
               );
             },
           );
@@ -52,14 +48,14 @@ class _VideosListState extends State<VideosList> {
                       vertical: 3.0,
                     ),
                     child: ScrollableVideoCard(
-                      videoID: widget.videoID[index],
-                      videoThumbnailUrl: widget.videoThumbnailUrl[index],
-                      videoTitle: widget.videoTitle[index],
-                      videoDate: widget.videoDate[index],
+                      videoID: widget.recentShows[index].episode_iframe_video,
+                      videoThumbnailUrl: widget.recentShows[index].Img,
+                      videoTitle: widget.recentShows[index].title,
+                      videoDate: widget.recentShows[index].shortDisc,
                     ),
                   );
                 },
-                itemCount: widget.videoID.length,
+                itemCount: widget.recentShows.length,
                 scrollDirection: Axis.horizontal,
               ),
             ),
@@ -179,7 +175,7 @@ class LivestreamCarouselState extends State<LivestreamCarousel> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(
         widget.livestreamTitle.length,
-        (index) {
+            (index) {
           return Container(
             width: 8,
             height: 8,
@@ -340,132 +336,21 @@ class ScrollableVideoCard extends StatelessWidget {
                   ),
                   videoDate != ""
                       ? Text(
-                          videoDate,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            height: 1.2,
-                          ),
-                          textAlign: TextAlign.start,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        )
+                    videoDate,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      height: 1.2,
+                    ),
+                    textAlign: TextAlign.start,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  )
                       : Container(),
                 ],
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class VideoCard extends StatelessWidget {
-  const VideoCard({
-    super.key,
-    required this.videoID,
-    required this.videoThumbnailUrl,
-    required this.videoTitle,
-    this.videoDate = "",
-  });
-
-  final String videoID;
-  final String videoThumbnailUrl;
-  final String videoTitle;
-  final String videoDate;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PlayerScreen(videoID: videoID),
-          ),
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: 3.0,
-          horizontal: 10.0,
-        ),
-        child: Card(
-          child: Container(
-            height: 220,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: NetworkImage(videoThumbnailUrl),
-                fit: BoxFit.cover,
-              ),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black,
-                  blurRadius: 6.0,
-                )
-              ],
-            ),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  bottom: 0,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(12),
-                        bottomRight: Radius.circular(12),
-                      ),
-                      gradient: LinearGradient(
-                        begin: Alignment.center,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.7),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 8,
-                  left: 12,
-                  right: 17,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        videoTitle,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          height: 1.5,
-                        ),
-                        textAlign: TextAlign.start,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                      videoDate != ""
-                          ? Text(
-                              videoDate,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                height: 1.2,
-                              ),
-                              textAlign: TextAlign.start,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            )
-                          : Container(),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
         ),
       ),
     );
@@ -479,7 +364,7 @@ class VideoCard1 extends StatelessWidget {
     required this.videoID,
     required this.videoThumbnailUrl,
     required this.videoTitle,
-    this.videoDate = "",
+    required this.videoDate,
   });
 
   final String videoID;
@@ -491,10 +376,14 @@ class VideoCard1 extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        print("RanjeetTest============>" + videoDate);
+
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PlayerScreen(videoID: videoID),
+            //builder: (context) => PlayerScreen(videoID: videoID),
+              builder: (context) => PlayerScreenNew(videoID: videoID, title: videoTitle, description: videoDate, publishedAtDate: '', publishedAtTime: '',),
+
           ),
         );
       },
@@ -561,16 +450,16 @@ class VideoCard1 extends StatelessWidget {
                       ),
                       videoDate != ""
                           ? Text(
-                              videoDate,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                height: 1.2,
-                              ),
-                              textAlign: TextAlign.start,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            )
+                        videoDate,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          height: 1.2,
+                        ),
+                        textAlign: TextAlign.start,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      )
                           : Container(),
                     ],
                   ),
